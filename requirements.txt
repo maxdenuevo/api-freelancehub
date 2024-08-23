@@ -28,3 +28,4 @@ zope.hookable==6.0
 zope.interface==7.0.1
 zope.lifecycleevent==5.0
 zope.proxy==5.3
+psycopg2-binary==2.9.9

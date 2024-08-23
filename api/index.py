@@ -7,12 +7,12 @@ import cloudinary.uploader
 from dotenv import load_dotenv
 import os
 import hashlib
-# from flask_cors import CORS  
+from flask_cors import CORS  
 import jwt
 
 load_dotenv()
 app = Flask(__name__)
-# CORS(app)
+CORS(app)
 
 jwt_secret = os.getenv("JWT_SECRET")
 
