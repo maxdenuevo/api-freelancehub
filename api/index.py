@@ -1,7 +1,7 @@
 
 from flask import Flask, request, jsonify
 import psycopg2
-import psycopg2.extras
+from psycopg2.extras import RealDictCursor
 import cloudinary
 import cloudinary.uploader
 from dotenv import load_dotenv
