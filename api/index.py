@@ -547,4 +547,36 @@ def update_plantilla(plantilla_id):
         cursor.close()
 
 
+#aqui empieza una nueva prueba prueba 
+
+app.route('/plantilla/<uuid:plantilla_id>', methods=['DELETE'])
+def delete_plantilla(plantilla_id):
+    cursor = connection.cursor()
+    try:
+        cursor.execute("DELETE FROM plantillas WHERE plantilla_id = %s", [str(plantilla_id)])
+        connection.commit()
+        return jsonify({"message": "Plantilla eliminada correctamente"}), 200
+    except Exception as e:
+        print(e)
+        return jsonify({"message": "Error al eliminar plantilla"}), 500
+    finally:
+        cursor.close()
+ 
+
+app.route('/plantilla/<uuid:plantilla_id>', methods=['GET'])
+def get_plantilla(plantilla_id):
+    cursor = connection.cursor()
+    try:
+        cursor.execute("SELECT * FROM plantillas WHERE plantilla_id = %s", [str(plantilla_id)])
+        plantilla = cursor.fetchone()
+        if plantilla:
+            return jsonify({"plantilla": plantilla}), 200
+        else:
+            return jsonify({"message": "Plantilla no encontrada"}), 404
+    except Exception as e:
+        print(e)
+        return jsonify({"message": "Error al obtener plantilla"}), 500
+    finally:
+        cursor.close()    
+
 # app.run(host='0.0.0.0', port=3000, debug=True)
