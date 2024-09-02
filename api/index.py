@@ -153,11 +153,12 @@ def create_tarea():
         descripcion = body.get('tarea_descripcion')
         completada = body.get('tarea_completada')
         necesita_pago = body.get('tarea_necesita_pago')
+        fecha_recordatorio = body.get('tarea_fecha_recordatorio')  # Nuevo campo
 
         cursor.execute("""
-            INSERT INTO tareas (proyecto_id, tarea_nombre, tarea_fecha, tarea_descripcion, tarea_completada, tarea_necesita_pago)
-            VALUES (%s, %s, %s, %s, %s, %s) RETURNING tarea_id
-        """, [proyecto_id, nombre, fecha, descripcion, completada, necesita_pago])
+            INSERT INTO tareas (proyecto_id, tarea_nombre, tarea_fecha, tarea_descripcion, tarea_completada, tarea_necesita_pago, tarea_fecha_recordatorio)
+            VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING tarea_id
+        """, [proyecto_id, nombre, fecha, descripcion, completada, necesita_pago, fecha_recordatorio])
 
         tarea_id = cursor.fetchone().get('tarea_id')
         connection.commit()
@@ -281,7 +282,7 @@ def get_proyectos():
         return jsonify({"proyectos": proyectos}), 200
     except Exception as e:
         print(e)
-        return jsonify({"message": "Error fetching projects"}), 500
+        return jsonify({"message": "Error trayendo proyecto"}), 500
     finally:
         cursor.close()
 
@@ -315,10 +316,10 @@ def update_proyecto(proyecto_id):
         """, values)
         connection.commit()
 
-        return jsonify({"message": "Project updated successfully"}), 200
+        return jsonify({"message": "Proyecto actualizado"}), 200
     except Exception as e:
         print(e)
-        return jsonify({"message": "Error updating project"}), 500
+        return jsonify({"message": "Error actualizando proyecto"}), 500
     finally:
         cursor.close()
 
@@ -328,10 +329,10 @@ def delete_proyecto(proyecto_id):
     try:
         cursor.execute("DELETE FROM proyectos WHERE proyecto_id = %s", [str(proyecto_id)])
         connection.commit()
-        return jsonify({"message": "Project deleted successfully"}), 200
+        return jsonify({"message": "Proyecto eliminado"}), 200
     except Exception as e:
         print(e)
-        return jsonify({"message": "Error deleting project"}), 500
+        return jsonify({"message": "Error eliminando proyecto"}), 500
     finally:
         cursor.close()
 
@@ -344,7 +345,7 @@ def get_tareas():
         return jsonify({"tareas": tareas}), 200
     except Exception as e:
         print(e)
-        return jsonify({"message": "Error fetching tasks"}), 500
+        return jsonify({"message": "Error trayendo tareas"}), 500
     finally:
         cursor.close()
 
@@ -357,10 +358,10 @@ def get_tarea(tarea_id):
         if tarea:
             return jsonify({"tarea": tarea}), 200
         else:
-            return jsonify({"message": "Task not found"}), 404
+            return jsonify({"message": "Tarea no encontrada"}), 404
     except Exception as e:
         print(e)
-        return jsonify({"message": "Error fetching task"}), 500
+        return jsonify({"message": "Error trayendo tareas"}), 500
     finally:
         cursor.close()
 
@@ -378,10 +379,10 @@ def update_tarea(tarea_id):
         """, values)
         connection.commit()
 
-        return jsonify({"message": "Task updated successfully"}), 200
+        return jsonify({"message": "Tarea actualizada"}), 200
     except Exception as e:
         print(e)
-        return jsonify({"message": "Error updating task"}), 500
+        return jsonify({"message": "Error actualizando tarea"}), 500
     finally:
         cursor.close()
 
@@ -391,10 +392,10 @@ def delete_tarea(tarea_id):
     try:
         cursor.execute("DELETE FROM tareas WHERE tarea_id = %s", [str(tarea_id)])
         connection.commit()
-        return jsonify({"message": "Task deleted successfully"}), 200
+        return jsonify({"message": "Tarea eliminada"}), 200
     except Exception as e:
         print(e)
-        return jsonify({"message": "Error deleting task"}), 500
+        return jsonify({"message": "Error eliminando tarea"}), 500
     finally:
         cursor.close()
 
@@ -407,7 +408,7 @@ def get_pagos():
         return jsonify({"pagos": pagos}), 200
     except Exception as e:
         print(e)
-        return jsonify({"message": "Error fetching payments"}), 500
+        return jsonify({"message": "Error trayendo pagos"}), 500
     finally:
         cursor.close()
 
@@ -425,10 +426,10 @@ def update_pago(pago_id):
         """, values)
         connection.commit()
 
-        return jsonify({"message": "Payment updated successfully"}), 200
+        return jsonify({"message": "Pago actualizado exitosamente"}), 200
     except Exception as e:
         print(e)
-        return jsonify({"message": "Error updating payment"}), 500
+        return jsonify({"message": "Error actualizando pago"}), 500
     finally:
         cursor.close()
 
@@ -438,10 +439,10 @@ def delete_pago(pago_id):
     try:
         cursor.execute("DELETE FROM pagos WHERE pago_id = %s", [str(pago_id)])
         connection.commit()
-        return jsonify({"message": "Payment deleted successfully"}), 200
+        return jsonify({"message": "Pago eliminado"}), 200
     except Exception as e:
         print(e)
-        return jsonify({"message": "Error deleting payment"}), 500
+        return jsonify({"message": "Error eliminando pago"}), 500
     finally:
         cursor.close()
 
@@ -454,10 +455,10 @@ def get_specific_pago(pago_id):
         if pago:
             return jsonify({"pago": pago}), 200
         else:
-            return jsonify({"message": "Payment not found"}), 404
+            return jsonify({"message": "Pago no encontrado"}), 404
     except Exception as e:
         print(e)
-        return jsonify({"message": "Error fetching payment"}), 500
+        return jsonify({"message": "Error encontrando pago"}), 500
     finally:
         cursor.close()
 

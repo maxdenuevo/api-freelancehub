@@ -39,6 +39,7 @@ CREATE TABLE "tareas"(
     "tarea_descripcion" TEXT NOT NULL,
     "tarea_completada" BOOLEAN NOT NULL,
     "tarea_necesita_pago" BOOLEAN NOT NULL,
+    "tarea_fecha_recordatorio" DATE NULL,
     CONSTRAINT "tareas_proyecto_id_foreign" FOREIGN KEY("proyecto_id") REFERENCES "proyectos"("proyecto_id")
 );
 
