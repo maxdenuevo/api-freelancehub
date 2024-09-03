@@ -127,7 +127,7 @@ def create_proyecto():
         termino = body.get('proyecto_termino')
         descripcion = body.get('proyecto_descripcion')
         tipo = body.get('proyecto_tipo')
-
+        print(usuario_id, cliente_id, nombre, presupuesto, inicio, termino, descripcion, tipo)
         cursor.execute("""
             INSERT INTO proyectos (usuario_id, cliente_id, proyecto_nombre, proyecto_presupuesto, proyecto_inicio, proyecto_termino, proyecto_descripcion, proyecto_tipo)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING proyecto_id
@@ -195,7 +195,7 @@ def create_pago():
     finally:
         cursor.close()
 
-@app.route('/get-pago/<uuid:pago_id>', methods=['GET'])
+@app.route('/get-pago/<string:pago_id>', methods=['GET'])
 def get_pago(pago_id):
     cursor = connection.cursor()
     try:
@@ -208,6 +208,22 @@ def get_pago(pago_id):
     except Exception as e:
         print(e)
         return jsonify({"message": "Error al obtener pago"}), 500
+    finally:
+        cursor.close()
+
+@app.route('/get-usuario/<string:user_id>', methods=['GET'])
+def get_user(user_id):
+    cursor = connection.cursor()
+    try:
+        cursor.execute("SELECT * FROM usuarios WHERE usuario_id = %s", [str(user_id)])
+        result = cursor.fetchone()
+        if result:
+            return jsonify({"usuario": result}), 200
+        else:
+            return jsonify({"message": "Usuario no existe"}), 404
+    except Exception as e:
+        print(e)
+        return jsonify({"message": "Error al obtener usuario"}), 500
     finally:
         cursor.close()
 
@@ -256,7 +272,7 @@ def create_contrato():
     finally:
         cursor.close()
 
-@app.route('/get-contrato/<uuid:contrato_id>', methods=['GET'])
+@app.route('/get-contrato/<string:contrato_id>', methods=['GET'])
 def get_contrato(contrato_id):
     cursor = connection.cursor()
     try:
@@ -273,11 +289,11 @@ def get_contrato(contrato_id):
         cursor.close()
 
 
-@app.route('/proyectos', methods=['GET'])
-def get_proyectos():
+@app.route('/proyectos/<string:user_id>', methods=['GET'])
+def get_proyectos(user_id):
     cursor = connection.cursor()
     try:
-        cursor.execute("SELECT * FROM proyectos")
+        cursor.execute("SELECT * FROM proyectos where usuario_id = %s", [user_id])
         proyectos = cursor.fetchall()
         return jsonify({"proyectos": proyectos}), 200
     except Exception as e:
@@ -286,7 +302,7 @@ def get_proyectos():
     finally:
         cursor.close()
 
-@app.route('/proyecto/<uuid:proyecto_id>', methods=['GET'])
+@app.route('/proyecto/<string:proyecto_id>', methods=['GET'])
 def get_proyecto(proyecto_id):
     cursor = connection.cursor()
     try:
@@ -302,7 +318,7 @@ def get_proyecto(proyecto_id):
     finally:
         cursor.close()
 
-@app.route('/proyecto/<uuid:proyecto_id>', methods=['PATCH'])
+@app.route('/proyecto/<string:proyecto_id>', methods=['PATCH'])
 def update_proyecto(proyecto_id):
     cursor = connection.cursor()
     try:
@@ -323,7 +339,7 @@ def update_proyecto(proyecto_id):
     finally:
         cursor.close()
 
-@app.route('/proyecto/<uuid:proyecto_id>', methods=['DELETE'])
+@app.route('/proyecto/<string:proyecto_id>', methods=['DELETE'])
 def delete_proyecto(proyecto_id):
     cursor = connection.cursor()
     try:
@@ -349,7 +365,7 @@ def get_tareas():
     finally:
         cursor.close()
 
-@app.route('/tarea/<uuid:tarea_id>', methods=['GET'])
+@app.route('/tarea/<string:tarea_id>', methods=['GET'])
 def get_tarea(tarea_id):
     cursor = connection.cursor()
     try:
@@ -365,7 +381,7 @@ def get_tarea(tarea_id):
     finally:
         cursor.close()
 
-@app.route('/tarea/<uuid:tarea_id>', methods=['PATCH'])
+@app.route('/tarea/<string:tarea_id>', methods=['PATCH'])
 def update_tarea(tarea_id):
     cursor = connection.cursor()
     try:
@@ -386,7 +402,7 @@ def update_tarea(tarea_id):
     finally:
         cursor.close()
 
-@app.route('/tarea/<uuid:tarea_id>', methods=['DELETE'])
+@app.route('/tarea/<string:tarea_id>', methods=['DELETE'])
 def delete_tarea(tarea_id):
     cursor = connection.cursor()
     try:
@@ -412,7 +428,7 @@ def get_pagos():
     finally:
         cursor.close()
 
-@app.route('/pago/<uuid:pago_id>', methods=['PATCH'])
+@app.route('/pago/<string:pago_id>', methods=['PATCH'])
 def update_pago(pago_id):
     cursor = connection.cursor()
     try:
@@ -433,7 +449,7 @@ def update_pago(pago_id):
     finally:
         cursor.close()
 
-@app.route('/pago/<uuid:pago_id>', methods=['DELETE'])
+@app.route('/pago/<string:pago_id>', methods=['DELETE'])
 def delete_pago(pago_id):
     cursor = connection.cursor()
     try:
@@ -446,7 +462,7 @@ def delete_pago(pago_id):
     finally:
         cursor.close()
 
-@app.route('/pago/<uuid:pago_id>', methods=['GET'])
+@app.route('/pago/<string:pago_id>', methods=['GET'])
 def get_specific_pago(pago_id):
     cursor = connection.cursor()
     try:
@@ -475,7 +491,7 @@ def get_clientes():
     finally:
         cursor.close()
 
-@app.route('/cliente/<uuid:cliente_id>', methods=['PATCH'])
+@app.route('/cliente/<string:cliente_id>', methods=['PATCH'])
 def update_cliente(cliente_id):
     cursor = connection.cursor()
     try:
@@ -496,7 +512,7 @@ def update_cliente(cliente_id):
     finally:
         cursor.close()
 
-@app.route('/cliente/<uuid:cliente_id>', methods=['DELETE'])
+@app.route('/cliente/<string:cliente_id>', methods=['DELETE'])
 def delete_cliente(cliente_id):
     cursor = connection.cursor()
     try:
@@ -510,7 +526,7 @@ def delete_cliente(cliente_id):
         cursor.close()
 
 
-@app.route('/cliente/<uuid:cliente_id>', methods=['GET'])
+@app.route('/cliente/<string:cliente_id>', methods=['GET'])
 def get_cliente(cliente_id):
     cursor = connection.cursor()
     try:
@@ -526,7 +542,7 @@ def get_cliente(cliente_id):
     finally:
         cursor.close()
 
-@app.route('/plantilla/<uuid:plantilla_id>', methods=['PATCH'])
+@app.route('/plantilla/<string:plantilla_id>', methods=['PATCH'])
 def update_plantilla(plantilla_id):
     cursor = connection.cursor()
     try:
@@ -550,7 +566,7 @@ def update_plantilla(plantilla_id):
 
 #aqui empieza una nueva prueba prueba 
 
-app.route('/plantilla/<uuid:plantilla_id>', methods=['DELETE'])
+app.route('/plantilla/<string:plantilla_id>', methods=['DELETE'])
 def delete_plantilla(plantilla_id):
     cursor = connection.cursor()
     try:
@@ -564,7 +580,7 @@ def delete_plantilla(plantilla_id):
         cursor.close()
  
 
-app.route('/plantilla/<uuid:plantilla_id>', methods=['GET'])
+app.route('/plantilla/<string:plantilla_id>', methods=['GET'])
 def get_plantilla(plantilla_id):
     cursor = connection.cursor()
     try:
@@ -580,4 +596,4 @@ def get_plantilla(plantilla_id):
     finally:
         cursor.close()    
 
-# app.run(host='0.0.0.0', port=3000, debug=True)
+app.run(host='0.0.0.0', port=3000, debug=True)
