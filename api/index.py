@@ -596,4 +596,5 @@ def get_plantilla(plantilla_id):
     finally:
         cursor.close()    
 
-app.run(host='0.0.0.0', port=3000, debug=True)
+# app.run(host='0.0.0.0', port=3000, debug=True)
+app.run(ssl_context='adhoc', debug=True)
