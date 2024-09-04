@@ -525,7 +525,6 @@ def delete_cliente(cliente_id):
     finally:
         cursor.close()
 
-
 @app.route('/cliente/<string:cliente_id>', methods=['GET'])
 def get_cliente(cliente_id):
     cursor = connection.cursor()
@@ -563,9 +562,6 @@ def update_plantilla(plantilla_id):
     finally:
         cursor.close()
 
-
-#aqui empieza una nueva prueba prueba 
-
 app.route('/plantilla/<string:plantilla_id>', methods=['DELETE'])
 def delete_plantilla(plantilla_id):
     cursor = connection.cursor()
@@ -595,6 +591,62 @@ def get_plantilla(plantilla_id):
         return jsonify({"message": "Error al obtener plantilla"}), 500
     finally:
         cursor.close()    
+
+# /clientes/<string:usuario_id>
+@app.route('/clientes/<string:usuario_id>', methods=['GET'])
+def get_clientes_by_usuario(usuario_id):
+    cursor = connection.cursor()
+    try:
+        cursor.execute("SELECT * FROM clientes WHERE usuario_id = %s", [usuario_id])
+        clientes = cursor.fetchall()
+        return jsonify({"clientes": clientes}), 200
+    except Exception as e:
+        print(e)
+        return jsonify({"message": "Error trayendo clientes"}), 500
+    finally:
+        cursor.close()
+
+# /contratos/<string:proyecto_id>
+@app.route('/contratos/<string:proyecto_id>', methods=['GET'])
+def get_contratos_by_proyecto(proyecto_id):
+    cursor = connection.cursor()
+    try:
+        cursor.execute("SELECT * FROM contratos WHERE proyecto_id = %s", [proyecto_id])
+        contratos = cursor.fetchall()
+        return jsonify({"contratos": contratos}), 200
+    except Exception as e:
+        print(e)
+        return jsonify({"message": "Error trayendo contratos"}), 500
+    finally:
+        cursor.close()
+
+# /pagos/<string:proyecto_id>
+@app.route('/pagos/<string:proyecto_id>', methods=['GET'])
+def get_pagos_by_proyecto(proyecto_id):
+    cursor = connection.cursor()
+    try:
+        cursor.execute("SELECT * FROM pagos WHERE proyecto_id = %s", [proyecto_id])
+        pagos = cursor.fetchall()
+        return jsonify({"pagos": pagos}), 200
+    except Exception as e:
+        print(e)
+        return jsonify({"message": "Error trayendo pagos"}), 500
+    finally:
+        cursor.close()
+
+# /tareas/<string:proyecto_id>
+@app.route('/tareas/<string:proyecto_id>', methods=['GET'])
+def get_tareas_by_proyecto(proyecto_id):
+    cursor = connection.cursor()
+    try:
+        cursor.execute("SELECT * FROM tareas WHERE proyecto_id = %s", [proyecto_id])
+        tareas = cursor.fetchall()
+        return jsonify({"tareas": tareas}), 200
+    except Exception as e:
+        print(e)
+        return jsonify({"message": "Error trayendo tareas"}), 500
+    finally:
+        cursor.close()
 
 # app.run(host='0.0.0.0', port=3000, debug=True)
 # app.run(ssl_context='adhoc', debug=True)
