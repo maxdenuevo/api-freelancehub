@@ -153,7 +153,7 @@ def create_tarea():
         descripcion = body.get('tarea_descripcion')
         completada = body.get('tarea_completada')
         necesita_pago = body.get('tarea_necesita_pago')
-        fecha_recordatorio = body.get('tarea_fecha_recordatorio')  # Nuevo campo
+        fecha_recordatorio = body.get('tarea_fecha_recordatorio')  
 
         cursor.execute("""
             INSERT INTO tareas (proyecto_id, tarea_nombre, tarea_fecha, tarea_descripcion, tarea_completada, tarea_necesita_pago, tarea_fecha_recordatorio)
