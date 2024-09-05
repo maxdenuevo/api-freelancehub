@@ -9,6 +9,7 @@ import os
 import hashlib
 from flask_cors import CORS  
 import jwt
+from flask_mail import Mail, Message
 
 load_dotenv()
 app = Flask(__name__)
@@ -31,6 +32,14 @@ cloudinary.config(
     api_key=os.getenv("CLOUDINARY_API_KEY"),
     api_secret=os.getenv("CLOUDINARY_API_SECRET")
 )
+
+app.config['MAIL_SERVER'] = os.getenv("MAIL_SERVER")
+app.config['MAIL_PORT'] = int(os.getenv("MAIL_PORT"))
+app.config['MAIL_USERNAME'] = os.getenv("MAIL_USERNAME")
+app.config['MAIL_PASSWORD'] = os.getenv("MAIL_PASSWORD")
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+app.config['MAIL_DEFAULT_SENDER'] = (os.getenv("MAIL_DEFAULT_SENDER"), os.getenv("MAIL_DEFAULT_SENDER_EMAIL"))
 
 @app.route('/')
 def home():
@@ -647,6 +656,20 @@ def get_tareas_by_proyecto(proyecto_id):
         return jsonify({"message": "Error trayendo tareas"}), 500
     finally:
         cursor.close()
+
+mail = Mail(app)
+
+@app.route('/send-email', methods=['POST'])
+def send_email():
+    body = request.get_json()
+    email = Message(
+        subject=body.get('subject'),
+        recipients=body.get('recipients'),
+        body=body.get('body')
+    )
+    mail.send(email)
+    return jsonify({"message": "Email enviado correctamente!"}), 200
+
 
 # app.run(host='0.0.0.0', port=3000, debug=True)
 # app.run(ssl_context='adhoc', debug=True)
