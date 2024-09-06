@@ -634,7 +634,12 @@ def get_contratos_by_proyecto(proyecto_id):
 def get_pagos_by_proyecto(proyecto_id):
     cursor = connection.cursor()
     try:
-        cursor.execute("SELECT * FROM pagos WHERE proyecto_id = %s", [proyecto_id])
+        cursor.execute("""
+            SELECT p.* 
+            FROM pagos p
+            JOIN tareas t ON p.tarea_id = t.tarea_id
+            WHERE t.proyecto_id = %s
+        """, [proyecto_id])
         pagos = cursor.fetchall()
         return jsonify({"pagos": pagos}), 200
     except Exception as e:
