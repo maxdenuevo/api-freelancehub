@@ -662,6 +662,43 @@ def get_tareas_by_proyecto(proyecto_id):
     finally:
         cursor.close()
 
+# /usuarios/<string:usuario_id>/update-password
+@app.route('/usuario/<string:usuario_id>/update-password', methods=['PATCH'])
+def update_usuario_password(usuario_id):
+    cursor = connection.cursor()
+    try:
+        body = request.get_json()
+        current_password = body.get('current_password')
+        new_password = body.get('new_password')
+
+        if not current_password or not new_password:
+            return jsonify({"message": "Contraseña actual y nueva son requeridas"}), 400
+
+        # revisa la contraseña actual
+        cursor.execute("SELECT usuario_password FROM usuarios WHERE usuario_id = %s", [usuario_id])
+        result = cursor.fetchone()
+        if not result:
+            return jsonify({"message": "Usuario no encontrado"}), 404
+
+        stored_password = result['usuario_password']
+        if hashlib.sha256(current_password.encode('utf-8')).hexdigest() != stored_password:
+            return jsonify({"message": "Contraseña actual incorrecta"}), 401
+
+        # actualiza con una contraseña nueva
+        hashed_new_password = hashlib.sha256(new_password.encode('utf-8')).hexdigest()
+        cursor.execute("""
+            UPDATE usuarios SET usuario_password = %s WHERE usuario_id = %s
+        """, [hashed_new_password, usuario_id])
+        connection.commit()
+
+        return jsonify({"message": "Contraseña actualizada exitosamente"}), 200
+    except Exception as e:
+        print(e)
+        return jsonify({"message": "Error al actualizar la contraseña"}), 500
+    finally:
+        cursor.close()        
+
+
 mail = Mail(app)
 
 @app.route('/send-email', methods=['POST'])
