@@ -487,17 +487,41 @@ def update_pago(pago_id):
     connection = get_db_connection()
     cursor = connection.cursor()
     try:
-        body = request.get_json()
-        fields = ', '.join([f"{k} = %s" for k in body.keys()])
-        values = list(body.values())
-        values.append(str(pago_id))
-
-        cursor.execute(f"""
-            UPDATE pagos SET {fields} WHERE pago_id = %s
-        """, values)
-        connection.commit()
-
-        return jsonify({"message": "Pago actualizado exitosamente"}), 200
+        tarea_id = request.form.get('tarea_id')
+        pago_monto = request.form.get('pago_monto')
+        pago_fecha = request.form.get('pago_fecha')
+        pago_completado = request.form.get('pago_completado')
+        
+        pago_comprobante = request.files.get('pago_comprobante')
+        
+        update_fields = {}
+        if tarea_id:
+            update_fields['tarea_id'] = tarea_id
+        if pago_monto:
+            update_fields['pago_monto'] = pago_monto
+        if pago_fecha:
+            update_fields['pago_fecha'] = pago_fecha
+        if pago_completado is not None:
+            update_fields['pago_completado'] = pago_completado
+        
+        if pago_comprobante:
+            resultado_upload = cloudinary.uploader.upload(pago_comprobante)
+            update_fields['pago_comprobante'] = resultado_upload['secure_url']
+        
+        if not update_fields:
+            return jsonify({"message": "No se proporcionaron campos válidos para actualizar"}), 400
+        
+        query = "UPDATE pagos SET " + ", ".join(f"{k} = %s" for k in update_fields.keys()) + " WHERE pago_id = %s RETURNING *"
+        values = list(update_fields.values()) + [str(pago_id)]
+        
+        cursor.execute(query, values)
+        updated_pago = cursor.fetchone()
+        
+        if updated_pago:
+            connection.commit()
+            return jsonify({"pago": updated_pago}), 200
+        else:
+            return jsonify({"message": "Pago no existe"}), 404
     except Exception as e:
         print(e)
         return jsonify({"message": "Error actualizando pago"}), 500
@@ -772,6 +796,103 @@ def update_usuario_password(usuario_id):
     finally:
         cursor.close()
         connection.close()        
+
+# Recupera todas las tareas de un proyecto que tengan pago asociado
+@app.route('/tareas-with-pagos/<string:proyecto_id>', methods=['GET'])
+def get_tareas_with_pagos(proyecto_id):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    try:
+        query = """
+        SELECT t.tarea_id, t.tarea_nombre, t.tarea_fecha, t.tarea_descripcion, 
+               t.tarea_completada, t.tarea_necesita_pago, t.tarea_fecha_recordatorio,
+               p.pago_id, p.pago_monto, p.pago_fecha, p.pago_completado, p.pago_comprobante
+        FROM tareas t
+        INNER JOIN pagos p ON t.tarea_id = p.tarea_id
+        WHERE t.proyecto_id = %s
+        """
+        
+        cursor.execute(query, [proyecto_id])
+        results = cursor.fetchall()
+
+        tareas_with_pagos = []
+        for row in results:
+            tarea = {
+                "tarea_id": row['tarea_id'],
+                "tarea_nombre": row['tarea_nombre'],
+                "tarea_fecha": row['tarea_fecha'].isoformat() if row['tarea_fecha'] else None,
+                "tarea_descripcion": row['tarea_descripcion'],
+                "tarea_completada": row['tarea_completada'],
+                "tarea_necesita_pago": row['tarea_necesita_pago'],
+                "tarea_fecha_recordatorio": row['tarea_fecha_recordatorio'].isoformat() if row['tarea_fecha_recordatorio'] else None,
+                "pago": {
+                    "pago_id": row['pago_id'],
+                    "pago_monto": float(row['pago_monto']) if row['pago_monto'] else None,
+                    "pago_fecha": row['pago_fecha'].isoformat() if row['pago_fecha'] else None,
+                    "pago_completado": row['pago_completado'],
+                    "pago_comprobante": row['pago_comprobante']
+                }
+            }
+            tareas_with_pagos.append(tarea)
+
+        if not tareas_with_pagos:
+            return jsonify({"message": "No se encontraron tareas con pagos para este proyecto"}), 404
+
+        return jsonify({"tareas_with_pagos": tareas_with_pagos}), 200
+
+    except Exception as e:
+        print(e)
+        return jsonify({"message": "Error al obtener tareas con pagos"}), 500
+    finally:
+        cursor.close()
+        connection.close()
+
+# Actualiza la contraseña de un usuario especifico que NO tiene su contraseña (con OTP)
+@app.route('/usuarios/change-password', methods=['POST'])
+def change_password_with_otp():
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    try:
+        data = request.get_json()
+        email = data.get('usuario_email')
+        otp = data.get('otp')
+        new_password = data.get('new_password')
+
+        if not email or not otp or not new_password:
+            return jsonify({"message": "Email, OTP y nueva contraseña son requeridos"}), 400
+
+        # Jen acá la función revisa el OTP
+        if not verify_otp(email, otp):
+            return jsonify({"message": "OTP inválido o expirado"}), 401
+
+        hashed_password = hashlib.sha256(new_password.encode('utf-8')).hexdigest()
+
+        cursor.execute("""
+            UPDATE usuarios 
+            SET usuario_password = %s 
+            WHERE usuario_email = %s
+            RETURNING usuario_id
+        """, [hashed_password, email])
+
+        result = cursor.fetchone()
+        if not result:
+            return jsonify({"message": "Usuario no encontrado"}), 404
+
+        connection.commit()
+
+        return jsonify({"message": "Contraseña actualizada exitosamente"}), 200
+
+    except Exception as e:
+        print(e)
+        connection.rollback()
+        return jsonify({"message": "Error al cambiar la contraseña"}), 500
+    finally:
+        cursor.close()
+        connection.close()
+
+def verify_otp(email, otp):
+    # No sé todavía cómo hacer esta lógica, por ahora siempre devuelve True
+    return True
 
 
 mail = Mail(app)
