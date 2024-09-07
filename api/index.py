@@ -199,17 +199,17 @@ def create_pago():
     connection = get_db_connection()
     cursor = connection.cursor()
     try:
-        body = request.get_json()
-        tarea_id = body.get('tarea_id')
-        pago_monto = body.get('pago_monto')
-        pago_fecha = body.get('pago_fecha')
-        pago_completado = body.get('pago_completado')
-        pago_comprobante = body.get('pago_comprobante')
-
+        tarea_id = request.form.get('tarea_id')
+        pago_monto = request.form.get('pago_monto')
+        pago_fecha = request.form.get('pago_fecha')
+        pago_completado = request.form.get('pago_completado')
+        pago_comprobante = request.files['pago_comprobante']
+        resultado_upload = cloudinary.uploader.upload(pago_comprobante)
+        url_pago_comprobante = resultado_upload['secure_url']
         cursor.execute("""
             INSERT INTO pagos (tarea_id, pago_monto, pago_fecha, pago_completado, pago_comprobante)
             VALUES (%s, %s, %s, %s, %s) RETURNING pago_id
-        """, [tarea_id, pago_monto, pago_fecha, pago_completado, pago_comprobante])
+        """, [tarea_id, pago_monto, pago_fecha, pago_completado, url_pago_comprobante])
 
         pago_id = cursor.fetchone().get('pago_id')
         connection.commit()
