@@ -68,6 +68,7 @@ def register_usuario():
         return jsonify({"message": "Error al crear usuario"}), 500
     finally:
         cursor.close()
+        connection.close()
 
 @app.route('/login-usuario', methods=['POST'])
 def login_usuario():
@@ -96,6 +97,7 @@ def login_usuario():
         return jsonify({"message": "Error al autenticar usuario"}), 500
     finally:
         cursor.close()
+        connection.close()
 
 
 @app.route('/create-cliente', methods=['POST'])
@@ -122,6 +124,7 @@ def create_cliente():
         return jsonify({"message": "Error al crear cliente"}), 500
     finally:
         cursor.close()
+        connection.close()
 
 @app.route('/create-proyecto', methods=['POST'])
 def create_proyecto():
@@ -150,6 +153,7 @@ def create_proyecto():
         return jsonify({"message": "Error al crear proyecto"}), 500
     finally:
         cursor.close()
+        connection.close()
 
 @app.route('/create-tarea', methods=['POST'])
 def create_tarea():
@@ -177,6 +181,7 @@ def create_tarea():
         return jsonify({"message": "Error al crear tarea"}), 500
     finally:
         cursor.close()
+        connection.close()
 
 
 @app.route('/create-pago', methods=['POST'])
@@ -203,6 +208,7 @@ def create_pago():
         return jsonify({"message": "Error al crear pago"}), 500
     finally:
         cursor.close()
+        connection.close()
 
 @app.route('/get-pago/<string:pago_id>', methods=['GET'])
 def get_pago(pago_id):
@@ -219,6 +225,7 @@ def get_pago(pago_id):
         return jsonify({"message": "Error al obtener pago"}), 500
     finally:
         cursor.close()
+        connection.close()
 
 @app.route('/get-usuario/<string:user_id>', methods=['GET'])
 def get_user(user_id):
@@ -235,6 +242,7 @@ def get_user(user_id):
         return jsonify({"message": "Error al obtener usuario"}), 500
     finally:
         cursor.close()
+        connection.close()
 
 
 @app.route('/create-plantilla', methods=['POST'])
@@ -257,6 +265,7 @@ def create_plantilla():
         return jsonify({"message": "Error al crear plantilla"}), 500
     finally:
         cursor.close()
+        connection.close()
 
 @app.route('/create-contrato', methods=['POST'])
 def create_contrato():
@@ -280,6 +289,7 @@ def create_contrato():
         return jsonify({"message": "Error al crear contrato"}), 500
     finally:
         cursor.close()
+        connection.close()
 
 @app.route('/get-contrato/<string:contrato_id>', methods=['GET'])
 def get_contrato(contrato_id):
@@ -296,6 +306,7 @@ def get_contrato(contrato_id):
         return jsonify({"message": "Error al obtener contrato"}), 500
     finally:
         cursor.close()
+        connection.close()
 
 
 @app.route('/proyectos/<string:user_id>', methods=['GET'])
@@ -310,6 +321,7 @@ def get_proyectos(user_id):
         return jsonify({"message": "Error trayendo proyecto"}), 500
     finally:
         cursor.close()
+        connection.close()
 
 @app.route('/proyecto/<string:proyecto_id>', methods=['GET'])
 def get_proyecto(proyecto_id):
@@ -326,6 +338,7 @@ def get_proyecto(proyecto_id):
         return jsonify({"message": "Error fetching project"}), 500
     finally:
         cursor.close()
+        connection.close()
 
 @app.route('/proyecto/<string:proyecto_id>', methods=['PATCH'])
 def update_proyecto(proyecto_id):
@@ -347,6 +360,7 @@ def update_proyecto(proyecto_id):
         return jsonify({"message": "Error actualizando proyecto"}), 500
     finally:
         cursor.close()
+        connection.close()
 
 @app.route('/proyecto/<string:proyecto_id>', methods=['DELETE'])
 def delete_proyecto(proyecto_id):
@@ -360,6 +374,7 @@ def delete_proyecto(proyecto_id):
         return jsonify({"message": "Error eliminando proyecto"}), 500
     finally:
         cursor.close()
+        connection.close()
 
 @app.route('/tareas', methods=['GET'])
 def get_tareas():
@@ -373,6 +388,7 @@ def get_tareas():
         return jsonify({"message": "Error trayendo tareas"}), 500
     finally:
         cursor.close()
+        connection.close()
 
 @app.route('/tarea/<string:tarea_id>', methods=['GET'])
 def get_tarea(tarea_id):
@@ -389,6 +405,7 @@ def get_tarea(tarea_id):
         return jsonify({"message": "Error trayendo tareas"}), 500
     finally:
         cursor.close()
+        connection.close()
 
 @app.route('/tarea/<string:tarea_id>', methods=['PATCH'])
 def update_tarea(tarea_id):
@@ -410,6 +427,7 @@ def update_tarea(tarea_id):
         return jsonify({"message": "Error actualizando tarea"}), 500
     finally:
         cursor.close()
+        connection.close()
 
 @app.route('/tarea/<string:tarea_id>', methods=['DELETE'])
 def delete_tarea(tarea_id):
@@ -423,6 +441,7 @@ def delete_tarea(tarea_id):
         return jsonify({"message": "Error eliminando tarea"}), 500
     finally:
         cursor.close()
+        connection.close()
 
 @app.route('/pagos', methods=['GET'])
 def get_pagos():
@@ -436,6 +455,7 @@ def get_pagos():
         return jsonify({"message": "Error trayendo pagos"}), 500
     finally:
         cursor.close()
+        connection.close()
 
 @app.route('/pago/<string:pago_id>', methods=['PATCH'])
 def update_pago(pago_id):
@@ -457,6 +477,7 @@ def update_pago(pago_id):
         return jsonify({"message": "Error actualizando pago"}), 500
     finally:
         cursor.close()
+        connection.close()
 
 @app.route('/pago/<string:pago_id>', methods=['DELETE'])
 def delete_pago(pago_id):
@@ -470,6 +491,7 @@ def delete_pago(pago_id):
         return jsonify({"message": "Error eliminando pago"}), 500
     finally:
         cursor.close()
+        connection.close()
 
 @app.route('/pago/<string:pago_id>', methods=['GET'])
 def get_specific_pago(pago_id):
@@ -486,6 +508,7 @@ def get_specific_pago(pago_id):
         return jsonify({"message": "Error encontrando pago"}), 500
     finally:
         cursor.close()
+        connection.close()
 
 @app.route('/clientes', methods=['GET'])
 def get_clientes():
@@ -499,6 +522,7 @@ def get_clientes():
         return jsonify({"message": "Error fetching clients"}), 500
     finally:
         cursor.close()
+        connection.close()
 
 @app.route('/cliente/<string:cliente_id>', methods=['PATCH'])
 def update_cliente(cliente_id):
@@ -520,6 +544,7 @@ def update_cliente(cliente_id):
         return jsonify({"message": "Error al actualizar cliente"}), 500
     finally:
         cursor.close()
+        connection.close()
 
 @app.route('/cliente/<string:cliente_id>', methods=['DELETE'])
 def delete_cliente(cliente_id):
@@ -533,6 +558,7 @@ def delete_cliente(cliente_id):
         return jsonify({"message": "Error al eliminar cliente"}), 500
     finally:
         cursor.close()
+        connection.close()
 
 @app.route('/cliente/<string:cliente_id>', methods=['GET'])
 def get_cliente(cliente_id):
@@ -549,6 +575,7 @@ def get_cliente(cliente_id):
         return jsonify({"message": "Error al obtener cliente"}), 500
     finally:
         cursor.close()
+        connection.close()
 
 @app.route('/plantilla/<string:plantilla_id>', methods=['PATCH'])
 def update_plantilla(plantilla_id):
@@ -570,6 +597,7 @@ def update_plantilla(plantilla_id):
         return jsonify({"message": "Error al actualizar plantilla"}), 500
     finally:
         cursor.close()
+        connection.close()
 
 app.route('/plantilla/<string:plantilla_id>', methods=['DELETE'])
 def delete_plantilla(plantilla_id):
@@ -583,6 +611,7 @@ def delete_plantilla(plantilla_id):
         return jsonify({"message": "Error al eliminar plantilla"}), 500
     finally:
         cursor.close()
+        connection.close()
  
 
 app.route('/plantilla/<string:plantilla_id>', methods=['GET'])
@@ -599,7 +628,8 @@ def get_plantilla(plantilla_id):
         print(e)
         return jsonify({"message": "Error al obtener plantilla"}), 500
     finally:
-        cursor.close()    
+        cursor.close()
+        connection.close()    
 
 # /clientes/<string:usuario_id>
 @app.route('/clientes/<string:usuario_id>', methods=['GET'])
@@ -614,6 +644,7 @@ def get_clientes_by_usuario(usuario_id):
         return jsonify({"message": "Error trayendo clientes"}), 500
     finally:
         cursor.close()
+        connection.close()
 
 # /contratos/<string:proyecto_id>
 @app.route('/contratos/<string:proyecto_id>', methods=['GET'])
@@ -628,6 +659,7 @@ def get_contratos_by_proyecto(proyecto_id):
         return jsonify({"message": "Error trayendo contratos"}), 500
     finally:
         cursor.close()
+        connection.close()
 
 # /pagos/<string:proyecto_id>
 @app.route('/pagos/<string:proyecto_id>', methods=['GET'])
@@ -647,6 +679,7 @@ def get_pagos_by_proyecto(proyecto_id):
         return jsonify({"message": "Error trayendo pagos"}), 500
     finally:
         cursor.close()
+        connection.close()
 
 # /tareas/<string:proyecto_id>
 @app.route('/tareas/<string:proyecto_id>', methods=['GET'])
@@ -661,6 +694,7 @@ def get_tareas_by_proyecto(proyecto_id):
         return jsonify({"message": "Error trayendo tareas"}), 500
     finally:
         cursor.close()
+        connection.close()
 
 # /usuarios/<string:usuario_id>/update-password
 @app.route('/usuario/<string:usuario_id>/update-password', methods=['PATCH'])
@@ -696,7 +730,8 @@ def update_usuario_password(usuario_id):
         print(e)
         return jsonify({"message": "Error al actualizar la contraseña"}), 500
     finally:
-        cursor.close()        
+        cursor.close()
+        connection.close()        
 
 
 mail = Mail(app)
