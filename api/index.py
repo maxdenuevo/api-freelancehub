@@ -17,15 +17,20 @@ CORS(app)
 
 jwt_secret = os.getenv("JWT_SECRET")
 
-connection = psycopg2.connect(
-    dbname=os.getenv("DATABASE_NAME"),
-    user=os.getenv("DATABASE_USER"),
-    password=os.getenv("DATABASE_PASSWORD"),
-    host=os.getenv("DATABASE_HOST"),
-    port=os.getenv("DATABASE_PORT"),
-    cursor_factory=RealDictCursor
-)
-
+def get_db_connection():
+    try:
+        connection = psycopg2.connect(
+            dbname=os.getenv("DATABASE_NAME"),
+            user=os.getenv("DATABASE_USER"),
+            password=os.getenv("DATABASE_PASSWORD"),
+            host=os.getenv("DATABASE_HOST"),
+            port=os.getenv("DATABASE_PORT"),
+            cursor_factory=RealDictCursor
+        )
+        return connection
+    except Exception as e:
+        print(f"Error al conectar con la base de datos: {e}")
+        return None
 
 cloudinary.config(
     cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
@@ -47,6 +52,7 @@ def home():
 
 @app.route('/register-usuario', methods=['POST'])
 def register_usuario():
+    connection = get_db_connection()
     cursor = connection.cursor()
     try:
         body = request.get_json()
@@ -72,6 +78,7 @@ def register_usuario():
 
 @app.route('/login-usuario', methods=['POST'])
 def login_usuario():
+    connection = get_db_connection()
     cursor = connection.cursor()
     try:
         body = request.get_json()
@@ -102,6 +109,7 @@ def login_usuario():
 
 @app.route('/create-cliente', methods=['POST'])
 def create_cliente():
+    connection = get_db_connection()
     cursor = connection.cursor()
     try:
         body = request.get_json()
@@ -128,6 +136,7 @@ def create_cliente():
 
 @app.route('/create-proyecto', methods=['POST'])
 def create_proyecto():
+    connection = get_db_connection()
     cursor = connection.cursor()
     try:
         body = request.get_json()
@@ -157,6 +166,7 @@ def create_proyecto():
 
 @app.route('/create-tarea', methods=['POST'])
 def create_tarea():
+    connection = get_db_connection()
     cursor = connection.cursor()
     try:
         body = request.get_json()
@@ -186,6 +196,7 @@ def create_tarea():
 
 @app.route('/create-pago', methods=['POST'])
 def create_pago():
+    connection = get_db_connection()
     cursor = connection.cursor()
     try:
         body = request.get_json()
@@ -212,6 +223,7 @@ def create_pago():
 
 @app.route('/get-pago/<string:pago_id>', methods=['GET'])
 def get_pago(pago_id):
+    connection = get_db_connection()
     cursor = connection.cursor()
     try:
         cursor.execute("SELECT * FROM pagos WHERE pago_id = %s", [str(pago_id)])
@@ -229,6 +241,7 @@ def get_pago(pago_id):
 
 @app.route('/get-usuario/<string:user_id>', methods=['GET'])
 def get_user(user_id):
+    connection = get_db_connection()
     cursor = connection.cursor()
     try:
         cursor.execute("SELECT * FROM usuarios WHERE usuario_id = %s", [str(user_id)])
@@ -247,6 +260,7 @@ def get_user(user_id):
 
 @app.route('/create-plantilla', methods=['POST'])
 def create_plantilla():
+    connection = get_db_connection()
     cursor = connection.cursor()
     try:
         body = request.get_json()
@@ -269,6 +283,7 @@ def create_plantilla():
 
 @app.route('/create-contrato', methods=['POST'])
 def create_contrato():
+    connection = get_db_connection()
     cursor = connection.cursor()
     try:
         body = request.get_json()
@@ -293,6 +308,7 @@ def create_contrato():
 
 @app.route('/get-contrato/<string:contrato_id>', methods=['GET'])
 def get_contrato(contrato_id):
+    connection = get_db_connection()
     cursor = connection.cursor()
     try:
         cursor.execute("SELECT * FROM contratos WHERE contrato_id = %s", [str(contrato_id)])
@@ -311,6 +327,7 @@ def get_contrato(contrato_id):
 
 @app.route('/proyectos/<string:user_id>', methods=['GET'])
 def get_proyectos(user_id):
+    connection = get_db_connection()
     cursor = connection.cursor()
     try:
         cursor.execute("SELECT * FROM proyectos where usuario_id = %s", [user_id])
@@ -325,6 +342,7 @@ def get_proyectos(user_id):
 
 @app.route('/proyecto/<string:proyecto_id>', methods=['GET'])
 def get_proyecto(proyecto_id):
+    connection = get_db_connection()
     cursor = connection.cursor()
     try:
         cursor.execute("SELECT * FROM proyectos WHERE proyecto_id = %s", [str(proyecto_id)])
@@ -342,6 +360,7 @@ def get_proyecto(proyecto_id):
 
 @app.route('/proyecto/<string:proyecto_id>', methods=['PATCH'])
 def update_proyecto(proyecto_id):
+    connection = get_db_connection()
     cursor = connection.cursor()
     try:
         body = request.get_json()
@@ -364,6 +383,7 @@ def update_proyecto(proyecto_id):
 
 @app.route('/proyecto/<string:proyecto_id>', methods=['DELETE'])
 def delete_proyecto(proyecto_id):
+    connection = get_db_connection()
     cursor = connection.cursor()
     try:
         cursor.execute("DELETE FROM proyectos WHERE proyecto_id = %s", [str(proyecto_id)])
@@ -378,6 +398,7 @@ def delete_proyecto(proyecto_id):
 
 @app.route('/tareas', methods=['GET'])
 def get_tareas():
+    connection = get_db_connection()
     cursor = connection.cursor()
     try:
         cursor.execute("SELECT * FROM tareas")
@@ -392,6 +413,7 @@ def get_tareas():
 
 @app.route('/tarea/<string:tarea_id>', methods=['GET'])
 def get_tarea(tarea_id):
+    connection = get_db_connection()
     cursor = connection.cursor()
     try:
         cursor.execute("SELECT * FROM tareas WHERE tarea_id = %s", [str(tarea_id)])
@@ -409,6 +431,7 @@ def get_tarea(tarea_id):
 
 @app.route('/tarea/<string:tarea_id>', methods=['PATCH'])
 def update_tarea(tarea_id):
+    connection = get_db_connection()
     cursor = connection.cursor()
     try:
         body = request.get_json()
@@ -431,6 +454,7 @@ def update_tarea(tarea_id):
 
 @app.route('/tarea/<string:tarea_id>', methods=['DELETE'])
 def delete_tarea(tarea_id):
+    connection = get_db_connection()
     cursor = connection.cursor()
     try:
         cursor.execute("DELETE FROM tareas WHERE tarea_id = %s", [str(tarea_id)])
@@ -445,6 +469,7 @@ def delete_tarea(tarea_id):
 
 @app.route('/pagos', methods=['GET'])
 def get_pagos():
+    connection = get_db_connection()
     cursor = connection.cursor()
     try:
         cursor.execute("SELECT * FROM pagos")
@@ -459,6 +484,7 @@ def get_pagos():
 
 @app.route('/pago/<string:pago_id>', methods=['PATCH'])
 def update_pago(pago_id):
+    connection = get_db_connection()
     cursor = connection.cursor()
     try:
         body = request.get_json()
@@ -481,6 +507,7 @@ def update_pago(pago_id):
 
 @app.route('/pago/<string:pago_id>', methods=['DELETE'])
 def delete_pago(pago_id):
+    connection = get_db_connection()
     cursor = connection.cursor()
     try:
         cursor.execute("DELETE FROM pagos WHERE pago_id = %s", [str(pago_id)])
@@ -495,6 +522,7 @@ def delete_pago(pago_id):
 
 @app.route('/pago/<string:pago_id>', methods=['GET'])
 def get_specific_pago(pago_id):
+    connection = get_db_connection()
     cursor = connection.cursor()
     try:
         cursor.execute("SELECT * FROM pagos WHERE pago_id = %s", [str(pago_id)])
@@ -512,6 +540,7 @@ def get_specific_pago(pago_id):
 
 @app.route('/clientes', methods=['GET'])
 def get_clientes():
+    connection = get_db_connection()
     cursor = connection.cursor()
     try:
         cursor.execute("SELECT * FROM clientes")
@@ -526,6 +555,7 @@ def get_clientes():
 
 @app.route('/cliente/<string:cliente_id>', methods=['PATCH'])
 def update_cliente(cliente_id):
+    connection = get_db_connection()
     cursor = connection.cursor()
     try:
         body = request.get_json()
@@ -548,6 +578,7 @@ def update_cliente(cliente_id):
 
 @app.route('/cliente/<string:cliente_id>', methods=['DELETE'])
 def delete_cliente(cliente_id):
+    connection = get_db_connection()
     cursor = connection.cursor()
     try:
         cursor.execute("DELETE FROM clientes WHERE cliente_id = %s", [str(cliente_id)])
@@ -562,6 +593,7 @@ def delete_cliente(cliente_id):
 
 @app.route('/cliente/<string:cliente_id>', methods=['GET'])
 def get_cliente(cliente_id):
+    connection = get_db_connection()
     cursor = connection.cursor()
     try:
         cursor.execute("SELECT * FROM clientes WHERE cliente_id = %s", [str(cliente_id)])
@@ -579,6 +611,7 @@ def get_cliente(cliente_id):
 
 @app.route('/plantilla/<string:plantilla_id>', methods=['PATCH'])
 def update_plantilla(plantilla_id):
+    connection = get_db_connection()
     cursor = connection.cursor()
     try:
         body = request.get_json()
@@ -601,6 +634,7 @@ def update_plantilla(plantilla_id):
 
 app.route('/plantilla/<string:plantilla_id>', methods=['DELETE'])
 def delete_plantilla(plantilla_id):
+    connection = get_db_connection()
     cursor = connection.cursor()
     try:
         cursor.execute("DELETE FROM plantillas WHERE plantilla_id = %s", [str(plantilla_id)])
@@ -616,6 +650,7 @@ def delete_plantilla(plantilla_id):
 
 app.route('/plantilla/<string:plantilla_id>', methods=['GET'])
 def get_plantilla(plantilla_id):
+    connection = get_db_connection()
     cursor = connection.cursor()
     try:
         cursor.execute("SELECT * FROM plantillas WHERE plantilla_id = %s", [str(plantilla_id)])
@@ -634,6 +669,7 @@ def get_plantilla(plantilla_id):
 # /clientes/<string:usuario_id>
 @app.route('/clientes/<string:usuario_id>', methods=['GET'])
 def get_clientes_by_usuario(usuario_id):
+    connection = get_db_connection()
     cursor = connection.cursor()
     try:
         cursor.execute("SELECT * FROM clientes WHERE usuario_id = %s", [usuario_id])
@@ -649,6 +685,7 @@ def get_clientes_by_usuario(usuario_id):
 # /contratos/<string:proyecto_id>
 @app.route('/contratos/<string:proyecto_id>', methods=['GET'])
 def get_contratos_by_proyecto(proyecto_id):
+    connection = get_db_connection()
     cursor = connection.cursor()
     try:
         cursor.execute("SELECT * FROM contratos WHERE proyecto_id = %s", [proyecto_id])
@@ -664,6 +701,7 @@ def get_contratos_by_proyecto(proyecto_id):
 # /pagos/<string:proyecto_id>
 @app.route('/pagos/<string:proyecto_id>', methods=['GET'])
 def get_pagos_by_proyecto(proyecto_id):
+    connection = get_db_connection()
     cursor = connection.cursor()
     try:
         cursor.execute("""
@@ -684,6 +722,7 @@ def get_pagos_by_proyecto(proyecto_id):
 # /tareas/<string:proyecto_id>
 @app.route('/tareas/<string:proyecto_id>', methods=['GET'])
 def get_tareas_by_proyecto(proyecto_id):
+    connection = get_db_connection()
     cursor = connection.cursor()
     try:
         cursor.execute("SELECT * FROM tareas WHERE proyecto_id = %s", [proyecto_id])
@@ -699,6 +738,7 @@ def get_tareas_by_proyecto(proyecto_id):
 # /usuarios/<string:usuario_id>/update-password
 @app.route('/usuario/<string:usuario_id>/update-password', methods=['PATCH'])
 def update_usuario_password(usuario_id):
+    connection = get_db_connection()
     cursor = connection.cursor()
     try:
         body = request.get_json()
