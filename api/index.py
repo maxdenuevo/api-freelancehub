@@ -10,6 +10,11 @@ import hashlib
 from flask_cors import CORS  
 import jwt
 from flask_mail import Mail, Message
+import schedule
+import time
+import threading
+from datetime import datetime, timedelta
+
 
 load_dotenv()
 app = Flask(__name__)
@@ -956,6 +961,72 @@ def send_email():
     )
     mail.send(email)
     return jsonify({"message": "Email enviado correctamente!"}), 200
+
+def send_reminder_emails():
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    try:
+        tomorrow = (datetime.now() + timedelta(days=1)).date()
+        
+        cursor.execute("""
+            SELECT u.usuario_email, u.usuario_nombre, p.proyecto_nombre, t.tarea_nombre
+            FROM tareas t
+            JOIN proyectos p ON t.proyecto_id = p.proyecto_id
+            JOIN usuarios u ON p.usuario_id = u.usuario_id
+            WHERE t.tarea_fecha = %s AND t.tarea_completada = FALSE
+        """, (tomorrow,))
+        
+        tasks = cursor.fetchall()
+        
+        reminders = {}
+        for task in tasks:
+            key = (task['usuario_email'], task['usuario_nombre'], task['proyecto_nombre'])
+            if key not in reminders:
+                reminders[key] = []
+            reminders[key].append(task['tarea_nombre'])
+        
+        for (email, name, project), task_list in reminders.items():
+            subject = f"Recordatorio: Mañana debes entregar tareas de {project}"
+            body = f"""
+            {name}:
+            
+            Mañana es la fecha límite para una o más tareas del proyecto {project}. Para mañana debes completar:
+            
+            {"".join([f"• {task}\n" for task in task_list])}
+            
+            Atentamente,
+            FreelanceHub
+            """
+            
+            message = Message(
+                subject=subject,
+                recipients=[email],
+                body=body
+            )
+            mail.send(message)
+        
+        return jsonify({"message": "Recordatorios enviados exitosamente"}), 200
+    
+    except Exception as e:
+        print(f"Error sending reminder emails: {e}")
+        return jsonify({"message": "Error al enviar recordatorios"}), 500
+    finally:
+        cursor.close()
+        connection.close()
+
+def run_schedule():
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+schedule.every().day.at("09:00").do(send_reminder_emails)
+
+scheduler_thread = threading.Thread(target=run_schedule)
+scheduler_thread.start()
+
+@app.route('/send-email-recordatorios', methods=['GET'])
+def trigger_send_reminder_emails():
+    return send_reminder_emails()
 
 
 # app.run(host='0.0.0.0', port=3000, debug=True)

@@ -17,6 +17,7 @@ psycopg2-binary==2.9.9
 pycparser==2.22
 PyJWT==2.8.0
 python-dotenv==1.0.1
+schedule==1.2.2
 setuptools==72.2.0
 six==1.16.0
 urllib3==2.2.2
