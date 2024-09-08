@@ -49,7 +49,6 @@ app.config['MAIL_DEFAULT_SENDER'] = (os.getenv("MAIL_DEFAULT_SENDER_NAME"), os.g
 @app.route('/')
 def home():
     return 'Hello, Freelancers'
-
 @app.route('/register-usuario', methods=['POST'])
 def register_usuario():
     connection = get_db_connection()
@@ -59,12 +58,13 @@ def register_usuario():
         email = body.get('usuario_email')
         rut = body.get('usuario_rut')
         password = body.get('usuario_password')
+        nombre = body.get('usuario_nombre')  # New field
         hashed_password = hashlib.sha256(password.encode('utf-8')).hexdigest()
 
         cursor.execute("""
-            INSERT INTO usuarios (usuario_email, usuario_password, usuario_rut)
-            VALUES (%s, %s, %s) RETURNING usuario_id
-        """, [email, hashed_password, rut])
+            INSERT INTO usuarios (usuario_email, usuario_password, usuario_rut, usuario_nombre)
+            VALUES (%s, %s, %s, %s) RETURNING usuario_id
+        """, [email, hashed_password, rut, nombre])
 
         usuario_id = cursor.fetchone().get('usuario_id')
         connection.commit()
@@ -94,7 +94,8 @@ def login_usuario():
         if hashlib.sha256(password.encode('utf-8')).hexdigest() == hashed_password:
             token = jwt.encode({
                 "usuario_id": result.get('usuario_id'),
-                "usuario_email": result.get('usuario_email')
+                "usuario_email": result.get('usuario_email'),
+                "usuario_nombre": result.get('usuario_nombre') 
             }, jwt_secret, algorithm='HS256')
 
             return jsonify({"message": "Usuario autenticado correctamente", "token": token}), 200
@@ -105,6 +106,54 @@ def login_usuario():
     finally:
         cursor.close()
         connection.close()
+
+@app.route('/usuario/<string:usuario_id>/update', methods=['PATCH'])
+def update_usuario(usuario_id):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    try:
+        body = request.get_json()
+        email = body.get('usuario_email')
+        rut = body.get('usuario_rut')
+        nombre = body.get('usuario_nombre')
+
+        update_fields = []
+        values = []
+
+        if email:
+            update_fields.append("usuario_email = %s")
+            values.append(email)
+        if rut:
+            update_fields.append("usuario_rut = %s")
+            values.append(rut)
+        if nombre:
+            update_fields.append("usuario_nombre = %s")
+            values.append(nombre)
+
+        if not update_fields:
+            return jsonify({"message": "No se proporcionaron campos para actualizar"}), 400
+
+        values.append(usuario_id)
+        query = f"""
+            UPDATE usuarios SET {", ".join(update_fields)} WHERE usuario_id = %s
+            RETURNING usuario_id, usuario_email, usuario_rut, usuario_nombre
+        """
+
+        cursor.execute(query, values)
+        updated_user = cursor.fetchone()
+        connection.commit()
+
+        if updated_user:
+            return jsonify({"message": "Usuario actualizado correctamente", "usuario": updated_user}), 200
+        else:
+            return jsonify({"message": "Usuario no encontrado"}), 404
+    except Exception as e:
+        print(e)
+        return jsonify({"message": "Error al actualizar usuario"}), 500
+    finally:
+        cursor.close()
+        connection.close()
+
 
 
 @app.route('/create-cliente', methods=['POST'])
@@ -244,7 +293,7 @@ def get_user(user_id):
     connection = get_db_connection()
     cursor = connection.cursor()
     try:
-        cursor.execute("SELECT * FROM usuarios WHERE usuario_id = %s", [str(user_id)])
+        cursor.execute("SELECT usuario_id, usuario_email, usuario_rut, usuario_nombre FROM usuarios WHERE usuario_id = %s", [str(user_id)])
         result = cursor.fetchone()
         if result:
             return jsonify({"usuario": result}), 200
@@ -759,7 +808,7 @@ def get_tareas_by_proyecto(proyecto_id):
         cursor.close()
         connection.close()
 
-# /usuarios/<string:usuario_id>/update-password
+# Actualiza la contraseña de un usuario especifico que Sí tiene su contraseña
 @app.route('/usuario/<string:usuario_id>/update-password', methods=['PATCH'])
 def update_usuario_password(usuario_id):
     connection = get_db_connection()

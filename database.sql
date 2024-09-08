@@ -4,7 +4,10 @@ CREATE TABLE "usuarios"(
     "usuario_id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     "usuario_email" VARCHAR(255) NOT NULL,
     "usuario_password" VARCHAR(255) NOT NULL,
-    "usuario_rut" VARCHAR(255) NOT NULL
+    "usuario_rut" VARCHAR(255) NOT NULL,
+    "usuario_nombre" VARCHAR(255) NOT NULL,
+    CONSTRAINT "unique_usuario_email" UNIQUE ("usuario_email"),
+    CONSTRAINT "unique_usuario_rut" UNIQUE ("usuario_rut")
 );
 
 CREATE TABLE "clientes"(
