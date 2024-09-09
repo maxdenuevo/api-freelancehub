@@ -862,8 +862,8 @@ def get_tareas_with_pagos(proyecto_id):
                t.tarea_completada, t.tarea_necesita_pago, t.tarea_fecha_recordatorio,
                p.pago_id, p.pago_monto, p.pago_fecha, p.pago_completado, p.pago_comprobante
         FROM tareas t
-        INNER JOIN pagos p ON t.tarea_id = p.tarea_id
-        WHERE t.proyecto_id = %s
+        LEFT JOIN pagos p ON t.tarea_id = p.tarea_id
+        WHERE t.proyecto_id = %s AND t.tarea_necesita_pago = TRUE
         """
         
         cursor.execute(query, [proyecto_id])
@@ -879,18 +879,20 @@ def get_tareas_with_pagos(proyecto_id):
                 "tarea_completada": row['tarea_completada'],
                 "tarea_necesita_pago": row['tarea_necesita_pago'],
                 "tarea_fecha_recordatorio": row['tarea_fecha_recordatorio'].isoformat() if row['tarea_fecha_recordatorio'] else None,
-                "pago": {
+                "pago": None
+            }
+            if row['pago_id']:
+                tarea["pago"] = {
                     "pago_id": row['pago_id'],
                     "pago_monto": float(row['pago_monto']) if row['pago_monto'] else None,
                     "pago_fecha": row['pago_fecha'].isoformat() if row['pago_fecha'] else None,
                     "pago_completado": row['pago_completado'],
                     "pago_comprobante": row['pago_comprobante']
                 }
-            }
             tareas_with_pagos.append(tarea)
 
         if not tareas_with_pagos:
-            return jsonify({"message": "No se encontraron tareas con pagos para este proyecto"}), 404
+            return jsonify({"message": "No se encontraron tareas que necesiten pago para este proyecto"}), 404
 
         return jsonify({"tareas_with_pagos": tareas_with_pagos}), 200
 
