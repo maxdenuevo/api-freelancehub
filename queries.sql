@@ -82,3 +82,37 @@ BEGIN
     (id_proyecto, 'Composición musical de Hans Zimmer', CURRENT_DATE + INTERVAL '10 days', 'Verificar el progreso de la banda sonora', FALSE, TRUE);
 
 END $$;
+
+
+BEGIN
+        INSERT INTO proyectos (usuario_id, cliente_id, proyecto_nombre, proyecto_presupuesto, proyecto_inicio, proyecto_termino, proyecto_descripcion, proyecto_tipo)
+        VALUES (
+            '241fcbf4-4fa8-40a7-a609-98049ee6a4b7', 
+            'd837f196-7fa8-49de-a86a-1a28d5da9cb6', 
+            'El Gladiador', 
+            1000000.00, 
+            '1999-01-01'::DATE, 
+            '2025-05-01'::DATE, 
+            'Película épica de drama histórico dirigida por Ridley Scott y protagonizada por Russell Crowe', 
+            'Producción de Cine'
+        )
+        RETURNING proyecto_id INTO id_proyecto;
+    EXCEPTION WHEN OTHERS THEN
+        RAISE NOTICE 'Error inserting proyecto: %', SQLERRM;
+    END;
+
+
+
+    BEGIN
+        INSERT INTO tareas (proyecto_id, tarea_nombre, tarea_fecha, tarea_descripcion, tarea_completada, tarea_necesita_pago)
+        VALUES
+        ('43309cfa-61fd-4b1f-b45a-99cd030af326', 'Contratar a Russell Crowe como Máximo', current_date, 'Finalizar contrato y programación para Russell Crowe', FALSE, TRUE),
+        ('43309cfa-61fd-4b1f-b45a-99cd030af326', 'Asegurar locaciones de filmación en Marruecos', current_date + INTERVAL '1 day', 'Obtener permisos y finalizar acuerdos para filmar en Marruecos', FALSE, TRUE),
+        ('43309cfa-61fd-4b1f-b45a-99cd030af326', 'Reunión de diseño de vestuario', current_date + INTERVAL '2 days', 'Reunirse con Janty Yates para discutir los diseños de vestuario', FALSE, TRUE),
+        ('43309cfa-61fd-4b1f-b45a-99cd030af326', 'Finalizar guion', current_date + INTERVAL '3 days', 'Revisión final y aprobación del guion por David Franzoni, John Logan y William Nicholson', FALSE, TRUE),
+        ('43309cfa-61fd-4b1f-b45a-99cd030af326', 'Comenzar construcción de escenarios', current_date + INTERVAL '4 days', 'Iniciar la construcción del set del Coliseo en Malta', FALSE, TRUE),
+        ('43309cfa-61fd-4b1f-b45a-99cd030af326', 'Coreografiar escenas de batalla', current_date + INTERVAL '5 days', 'Trabajar con el coordinador de escenas de riesgo en las secuencias de lucha', FALSE, TRUE),
+        ('43309cfa-61fd-4b1f-b45a-99cd030af326', 'Composición musical de Hans Zimmer', current_date + INTERVAL '6 days', 'Verificar el progreso de la banda sonora', FALSE, TRUE);
+    EXCEPTION WHEN OTHERS THEN
+        RAISE NOTICE 'Error inserting tareas: %', SQLERRM;
+    END;

@@ -257,9 +257,13 @@ def create_pago():
         pago_monto = request.form.get('pago_monto')
         pago_fecha = request.form.get('pago_fecha')
         pago_completado = request.form.get('pago_completado')
-        pago_comprobante = request.files['pago_comprobante']
-        resultado_upload = cloudinary.uploader.upload(pago_comprobante)
-        url_pago_comprobante = resultado_upload['secure_url']
+        
+        url_pago_comprobante = None
+        pago_comprobante = request.files.get('pago_comprobante')
+        if pago_comprobante:
+            resultado_upload = cloudinary.uploader.upload(pago_comprobante)
+            url_pago_comprobante = resultado_upload['secure_url']
+        
         cursor.execute("""
             INSERT INTO pagos (tarea_id, pago_monto, pago_fecha, pago_completado, pago_comprobante)
             VALUES (%s, %s, %s, %s, %s) RETURNING pago_id
@@ -546,8 +550,6 @@ def update_pago(pago_id):
         pago_fecha = request.form.get('pago_fecha')
         pago_completado = request.form.get('pago_completado')
         
-        pago_comprobante = request.files.get('pago_comprobante')
-        
         update_fields = {}
         if tarea_id:
             update_fields['tarea_id'] = tarea_id
@@ -558,9 +560,17 @@ def update_pago(pago_id):
         if pago_completado is not None:
             update_fields['pago_completado'] = pago_completado
         
-        if pago_comprobante:
-            resultado_upload = cloudinary.uploader.upload(pago_comprobante)
-            update_fields['pago_comprobante'] = resultado_upload['secure_url']
+        if 'pago_comprobante' in request.files:
+            pago_comprobante = request.files['pago_comprobante']
+            if pago_comprobante.filename != '':
+                try:
+                    resultado_upload = cloudinary.uploader.upload(pago_comprobante)
+                    update_fields['pago_comprobante'] = resultado_upload['secure_url']
+                except Exception as e:
+                    print(f"Error uploading file: {e}")
+                    return jsonify({"message": "Error al subir el comprobante de pago"}), 500
+        elif 'remove_pago_comprobante' in request.form and request.form['remove_pago_comprobante'] == 'true':
+            update_fields['pago_comprobante'] = None
         
         if not update_fields:
             return jsonify({"message": "No se proporcionaron campos válidos para actualizar"}), 400
@@ -573,12 +583,12 @@ def update_pago(pago_id):
         
         if updated_pago:
             connection.commit()
-            return jsonify({"pago": updated_pago}), 200
+            return jsonify({"message": "Pago actualizado correctamente", "pago": updated_pago}), 200
         else:
-            return jsonify({"message": "Pago no existe"}), 404
+            return jsonify({"message": "Pago no encontrado"}), 404
     except Exception as e:
         print(e)
-        return jsonify({"message": "Error actualizando pago"}), 500
+        return jsonify({"message": "Error al actualizar pago"}), 500
     finally:
         cursor.close()
         connection.close()
